@@ -82,6 +82,7 @@ public class Renderer implements RenderingManager {
 
     private ObjectIntMap<String> sizeByClass = new ObjectIntHashMap<>();
     private int stringPoolSize;
+    private int longPoolSize;
     private int metadataSize;
 
     private boolean longLibraryUsed;
@@ -110,6 +111,10 @@ public class Renderer implements RenderingManager {
 
     public int getStringPoolSize() {
         return stringPoolSize;
+    }
+
+    public int getLongPoolSize() {
+        return longPoolSize;
     }
 
     public int getMetadataSize() {
@@ -207,6 +212,26 @@ public class Renderer implements RenderingManager {
                 int sz = writer.getOffset() - start;
                 appendClassSize(initializer.field.getClassName(), sz);
             }
+        } catch (IOException e) {
+            throw new RenderingException("IO error", e);
+        }
+    }
+
+    public void renderLongPool() throws RenderingException {
+        if (context.getLongPool().isEmpty()) {
+            return;
+        }
+        try {
+            int start = writer.getOffset();
+            writer.append("$rt_longPool([");
+            for (int i = 0; i < context.getLongPool().size(); ++i) {
+                if (i > 0) {
+                    writer.append(',').ws();
+                }
+                RenderingUtil.writeLong(writer, context.getLongPool().get(i));
+            }
+            writer.append("]);").newLine();
+            longPoolSize = writer.getOffset() - start;
         } catch (IOException e) {
             throw new RenderingException("IO error", e);
         }

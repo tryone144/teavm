@@ -652,6 +652,16 @@ function $rt_stringPool(strings) {
 function $rt_s(index) {
     return $rt_stringPool_instance[index];
 }
+var $rt_longPool_instance;
+function $rt_longPool(longs) {
+    $rt_longPool_instance = new Array(longs.length);
+    for (var i = 0; i < longs.length; ++i) {
+        $rt_longPool_instance[i] = Long_create(longs[i][0], longs[i][1]);
+    }
+}
+function $rt_l(index) {
+    return $rt_longPool_instance[index];
+}
 function $rt_eraseClinit(target) {
     return target.$clinit = function() {};
 }
@@ -671,17 +681,19 @@ if (typeof BigInt !== 'function') {
         return $rt_numberConversionView.getFloat64(0, true);
     }
 } else {
+    var _CONST_32 = BigInt(32);
+    var _CONST_UINTMAX = BigInt(0xFFFFFFFF);
     $rt_doubleToLongBits = function(n) {
         $rt_numberConversionView.setFloat64(0, n, true);
         // For compatibility with Safari
         var lo = $rt_numberConversionView.getInt32(0, true);
         var hi = $rt_numberConversionView.getInt32(4, true);
-        return BigInt.asIntN(64, BigInt.asUintN(32, BigInt(lo)) | (BigInt(hi) << BigInt(32)));
+        return BigInt.asIntN(64, BigInt.asUintN(32, BigInt(lo)) | (BigInt(hi) << _CONST_32));
     }
     $rt_longBitsToDouble = function(n) {
         // For compatibility with Safari
-        var hi = Number(BigInt.asIntN(32, n >> BigInt(32)));
-        var lo = Number(BigInt.asIntN(32, n & BigInt(0xFFFFFFFF)));
+        var hi = Number(BigInt.asIntN(32, n >> _CONST_32));
+        var lo = Number(BigInt.asIntN(32, n & _CONST_UINTMAX));
         $rt_numberConversionView.setInt32(0, lo, true);
         $rt_numberConversionView.setInt32(4, hi, true);
         return $rt_numberConversionView.getFloat64(0, true);
@@ -799,6 +811,7 @@ function Long_isNegative(a) {
 
 var Long_MAX_NORMAL = 1 << 18;
 var Long_ZERO;
+var Long_ONE;
 var Long_create;
 var Long_fromInt;
 var Long_fromNumber;
@@ -827,6 +840,7 @@ if (typeof BigInt !== "function") {
     };
 
     Long_ZERO = new Long(0, 0);
+    Long_ONE = new Long(1, 0);
     Long_fromInt = function(val) {
         return new Long(val, (-(val < 0)) | 0);
     }
@@ -850,9 +864,11 @@ if (typeof BigInt !== "function") {
         return val.lo;
     }
 } else {
+    var _CONST_32 = BigInt(32);
     Long_ZERO = BigInt(0);
+    Long_ONE = BigInt(1);
     Long_create = function(lo, hi) {
-        return BigInt.asIntN(64, BigInt.asUintN(32, BigInt(lo)) | (BigInt(hi) << BigInt(32)));
+        return BigInt.asIntN(64, BigInt(lo >>> 0) | (BigInt(hi >>> 0) << _CONST_32));
     }
     Long_fromInt = function(val) {
         return BigInt(val);
@@ -864,7 +880,7 @@ if (typeof BigInt !== "function") {
         return Number(val);
     }
     Long_hi = function(val) {
-        return Number(BigInt.asIntN(64, val >> BigInt(32))) | 0;
+        return Number(BigInt.asIntN(64, val >> _CONST_32)) | 0;
     }
     Long_lo = function(val) {
         return Number(BigInt.asIntN(32, val)) | 0;

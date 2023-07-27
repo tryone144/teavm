@@ -427,6 +427,7 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
             runtimeRenderer.renderHandWrittenRuntime("array.js");
             renderer.renderStringPool();
             renderer.renderStringConstants();
+            renderer.renderLongPool();
             renderer.renderCompatibilityStubs();
 
             if (renderer.isLongLibraryUsed()) {
@@ -498,6 +499,7 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
         System.out.println("Total output size: " + STATS_NUM_FORMAT.format(totalSize));
         System.out.println("Metadata size: " + getSizeWithPercentage(renderer.getMetadataSize(), totalSize));
         System.out.println("String pool size: " + getSizeWithPercentage(renderer.getStringPoolSize(), totalSize));
+        System.out.println("Long pool size: " + getSizeWithPercentage(renderer.getLongPoolSize(), totalSize));
 
         ObjectIntMap<String> packageSizeMap = new ObjectIntHashMap<>();
         for (String className : renderer.getClassesInStats()) {

@@ -61,6 +61,9 @@ public class RenderingContext {
     private final Map<String, Integer> stringPoolMap = new HashMap<>();
     private final List<String> stringPool = new ArrayList<>();
     private final List<String> readonlyStringPool = Collections.unmodifiableList(stringPool);
+    private final Map<Long, Integer> longPoolMap = new HashMap<>();
+    private final List<Long> longPool = new ArrayList<>();
+    private final List<Long> readonlyLongPool = Collections.unmodifiableList(longPool);
     private final Map<MethodReference, InjectorHolder> injectorMap = new HashMap<>();
     private boolean minifying;
     private ClassInitializerInfo classInitializerInfo;
@@ -222,6 +225,17 @@ public class RenderingContext {
         return readonlyStringPool;
     }
 
+    public int lookupLong(long value) {
+        return longPoolMap.computeIfAbsent(value, key -> {
+            longPool.add(key);
+            return longPool.size() - 1;
+        });
+    }
+
+    public List<Long> getLongPool() {
+        return readonlyLongPool;
+    }
+
     public void constantToString(SourceWriter writer, Object cst) throws IOException {
         if (cst == null) {
             writer.append("null");
@@ -239,11 +253,11 @@ public class RenderingContext {
             long value = (Long) cst;
             if (value == 0) {
                 writer.appendFunction("Long_ZERO");
-            } else if ((int) value == value) {
-                writer.appendFunction("Long_fromInt").append("(").append(String.valueOf(value)).append(")");
+            } else if (value == 1) {
+                writer.appendFunction("Long_ONE");
             } else {
-                writer.appendFunction("Long_create").append("(" + (value & 0xFFFFFFFFL)
-                        + ", " + (value >>> 32) + ")");
+                int index = lookupLong(value);
+                writer.appendFunction("$rt_l").append("(" + index + ")");
             }
         } else if (cst instanceof Character) {
             writer.append(Integer.toString((Character) cst));
