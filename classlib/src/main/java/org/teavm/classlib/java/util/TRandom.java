@@ -18,8 +18,6 @@ package org.teavm.classlib.java.util;
 import java.util.function.DoublePredicate;
 import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
-import org.teavm.backend.wasm.runtime.WasmSupport;
-import org.teavm.classlib.PlatformDetector;
 import org.teavm.classlib.java.io.TSerializable;
 import org.teavm.classlib.java.lang.TMath;
 import org.teavm.classlib.java.lang.TObject;
@@ -29,18 +27,15 @@ import org.teavm.classlib.java.util.stream.TLongStream;
 import org.teavm.classlib.java.util.stream.doubleimpl.TSimpleDoubleStreamImpl;
 import org.teavm.classlib.java.util.stream.intimpl.TSimpleIntStreamImpl;
 import org.teavm.classlib.java.util.stream.longimpl.TSimpleLongStreamImpl;
-import org.teavm.interop.Import;
-import org.teavm.interop.Unmanaged;
-import org.teavm.jso.JSBody;
 
 public class TRandom extends TObject implements TSerializable {
 
     /** A stored gaussian value for nextGaussian() */
     private double storedGaussian;
-    
+
     /** Whether storedGuassian value is valid */
     private boolean haveStoredGaussian;
-    
+
     public TRandom() {
     }
 
@@ -143,13 +138,7 @@ public class TRandom extends TObject implements TSerializable {
     }
 
     public double nextDouble() {
-        if (PlatformDetector.isC()) {
-            return crand();
-        } else if (PlatformDetector.isWebAssembly()) {
-            return WasmSupport.random();
-        } else {
-            return random();
-        }
+        return Math.random();
     }
 
     public double nextDouble(double bound) {
@@ -169,10 +158,6 @@ public class TRandom extends TObject implements TSerializable {
         }
         return origin + nextDouble(bound - origin);
     }
-
-    @Import(name = "teavm_rand")
-    @Unmanaged
-    private static native double crand();
 
     /**
      * Generate a random number with Gaussian distribution:
@@ -206,11 +191,6 @@ public class TRandom extends TObject implements TSerializable {
 
         return v1 * m;
     }
-
-    @JSBody(script = "return Math.random();")
-    @Import(module = "teavmMath", name = "random")
-    @Unmanaged
-    private static native double random();
 
     public TIntStream ints(long streamSize) {
         if (streamSize < 0) {
