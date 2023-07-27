@@ -317,7 +317,7 @@ if (typeof BigInt !== 'function') {
     }
 
     Long_shl = function(a, b) {
-        b &= 63;
+        b = (b.lo != undefined ? b.lo : b) & 63;
         if (b === 0) {
             return a;
         } else if (b < 32) {
@@ -330,7 +330,7 @@ if (typeof BigInt !== 'function') {
     }
 
     Long_shr = function(a, b) {
-        b &= 63;
+        b = (b.lo != undefined ? b.lo : b) & 63;
         if (b === 0) {
             return a;
         } else if (b < 32) {
@@ -343,7 +343,7 @@ if (typeof BigInt !== 'function') {
     }
 
     Long_shru = function(a, b) {
-        b &= 63;
+        b = (b.lo != undefined ? b.lo : b) & 63;
         if (b === 0) {
             return a;
         } else if (b < 32) {
@@ -660,15 +660,15 @@ if (typeof BigInt !== 'function') {
     }
 
     Long_shl = function(a, b) {
-        return BigInt.asIntN(64, a << BigInt(b & 63));
+        return BigInt.asIntN(64, a << ((typeof b === "bigint") ? b : BigInt(b & 63)));
     }
 
     Long_shr = function(a, b) {
-        return BigInt.asIntN(64, a >> BigInt(b & 63));
+        return BigInt.asIntN(64, a >> ((typeof b === "bigint") ? b : BigInt(b & 63)));
     }
 
     Long_shru = function(a, b) {
-        return BigInt.asIntN(64, BigInt.asUintN(64, a) >> BigInt(b & 63));
+        return BigInt.asIntN(64, BigInt.asUintN(64, a) >> ((typeof b === "bigint") ? b : BigInt(b & 63)));
     }
 
     Long_not = function(a) {

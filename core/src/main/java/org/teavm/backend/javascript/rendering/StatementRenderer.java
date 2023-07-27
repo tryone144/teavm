@@ -620,6 +620,76 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
         }
     }
 
+    private void visitUnsignedIntToLong(BinaryExpr orig, BinaryExpr cast) {
+        try {
+            if (orig.getLocation() != null) {
+                pushLocation(orig.getLocation());
+            }
+
+            writer.appendFunction("Long_fromInt").append('(');
+            precedence = Precedence.min();
+            visitBinary(cast, ">>>", false);
+            writer.append(')');
+            if (orig.getLocation() != null) {
+                popLocation();
+            }
+        } catch (IOException e) {
+            throw new RenderingException("IO error occurred", e);
+        }
+    }
+
+    private BinaryExpr castUnsignedIntToLong(PrimitiveCastExpr cast, ConstantExpr constant) {
+        if (!(constant.getValue() instanceof Long)) {
+            return null;
+        }
+
+        long val = (Long) constant.getValue();
+        if (val != 0xFFFFFFFFL) {
+            return null;
+        }
+        if (cast.getSource() != OperationType.INT && cast.getTarget() != OperationType.LONG) {
+            return null;
+        }
+
+        // Convert `(long)integer & 0xFFFFFFFFL` to equivalent `Long_fromInt(integer >>> 0)`
+        Expr l = cast.getValue();
+        Expr r = Expr.constant(Integer.valueOf(0));
+        Expr inner = Expr.binary(BinaryOperation.UNSIGNED_RIGHT_SHIFT, OperationType.INT, l, r);
+        return (BinaryExpr) inner;
+    }
+
+    private BinaryExpr extractUnsignedIntToLongCast(BinaryExpr expr) {
+        Expr left = expr.getFirstOperand();
+        Expr right = expr.getSecondOperand();
+
+        if ((left instanceof PrimitiveCastExpr) && (right instanceof ConstantExpr)) {
+            return castUnsignedIntToLong((PrimitiveCastExpr) left, (ConstantExpr) right);
+        } else if ((left instanceof ConstantExpr) && (right instanceof PrimitiveCastExpr)) {
+            return castUnsignedIntToLong((PrimitiveCastExpr) right, (ConstantExpr) left);
+        }
+
+        return null;
+    }
+
+    private BinaryExpr extractLongConstantShiftAmount(BinaryExpr binary) {
+        Expr expr = binary.getSecondOperand();
+        if (!(expr instanceof ConstantExpr)) {
+            return null;
+        }
+
+        ConstantExpr constant = (ConstantExpr) expr;
+        if (!(constant.getValue() instanceof Number)) {
+            return null;
+        }
+
+        long amount = ((Number) constant.getValue()).longValue();
+        Long longAmount = Long.valueOf(amount & 63);
+
+        constant.setValue(longAmount);
+        return binary;
+    }
+
+
     @Override
     public void visit(BinaryExpr expr) {
         if (expr.getType() == OperationType.LONG) {
@@ -644,19 +714,27 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     visitBinaryFunction(expr, "Long_or");
                     break;
                 case BITWISE_AND:
-                    visitBinaryFunction(expr, "Long_and");
+                    BinaryExpr unsignedIntCast = extractUnsignedIntToLongCast(expr);
+                    if (unsignedIntCast != null) {
+                        visitUnsignedIntToLong(expr, unsignedIntCast);
+                    } else {
+                        visitBinaryFunction(expr, "Long_and");
+                    }
                     break;
                 case BITWISE_XOR:
                     visitBinaryFunction(expr, "Long_xor");
                     break;
                 case LEFT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shl");
+                    BinaryExpr constLeftShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constLeftShift != null ? constLeftShift : expr, "Long_shl");
                     break;
                 case RIGHT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shr");
+                    BinaryExpr constRightShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constRightShift != null ? constRightShift : expr, "Long_shr");
                     break;
                 case UNSIGNED_RIGHT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shru");
+                    BinaryExpr constURightShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constURightShift != null ? constURightShift : expr, "Long_shru");
                     break;
                 case COMPARE:
                     visitBinaryFunction(expr, "Long_compare");
