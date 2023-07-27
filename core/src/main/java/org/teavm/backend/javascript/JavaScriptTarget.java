@@ -464,6 +464,17 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
 
     private void printWrapperStart(SourceWriter writer) throws IOException {
         writer.append("\"use strict\";").newLine();
+        writer.append("((function(root, factory) {").indent().softNewLine();
+        writer.append("if (typeof define === 'function' && define.amd) {").indent().softNewLine();
+        writer.append("define(['exports'], factory);").softNewLine().outdent();
+        writer.append("} else if (typeof exports === 'object' && ")
+            .append("typeof exports.nodeName !== 'string') {").indent().softNewLine();
+        writer.append("factory(exports);").softNewLine().outdent();
+        writer.append("} else {").indent().softNewLine();
+        writer.append("factory(root);").softNewLine().outdent();
+        writer.append("}").softNewLine().outdent();
+        writer.append("})(typeof self !== 'undefined' ? self : this, ")
+            .append("function(exports) {").indent().softNewLine();
         for (String key : controller.getEntryPoints().keySet()) {
             writer.append("var ").append(key).append(";").softNewLine();
         }
@@ -471,7 +482,12 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
     }
 
     private void printWrapperEnd(SourceWriter writer) throws IOException {
-        writer.append("})(this);").newLine();
+        writer.append("})(typeof self !== 'undefined' ? self : ")
+            .append("typeof global !== 'undefined' ? global : this);").newLine();
+        for (String key : controller.getEntryPoints().keySet()) {
+            writer.append("exports.").append(key).ws().append("=").ws().append(key).append(";").softNewLine();
+        }
+        writer.outdent().append("}));");
     }
 
     private void printStats(Renderer renderer, int totalSize) {
