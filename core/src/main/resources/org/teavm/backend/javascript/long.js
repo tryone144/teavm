@@ -15,6 +15,15 @@
  */
 "use strict";
 
+let $rt_longPool_instance;
+let $rt_longPool = longs => {
+    $rt_longPool_instance = new teavm_globals.Array(longs.length);
+    for (let i = 0; i < longs.length; ++i) {
+        $rt_longPool_instance[i] = Long_create(longs[i][0], longs[i][1]);
+    }
+}
+let $rt_l = index => $rt_longPool_instance[index];
+
 let Long_MAX_NORMAL = 1 << 18;
 let Long_ZERO = teavm_globals.BigInt(0);
 let Long_ONE = teavm_globals.BigInt(1);

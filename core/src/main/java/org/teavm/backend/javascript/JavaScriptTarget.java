@@ -420,6 +420,7 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
 
         renderer.renderStringPool();
         renderer.renderStringConstants();
+        renderer.renderLongPool();
         renderer.renderCompatibilityStubs();
 
         var alias = "$rt_export_main";
@@ -664,6 +665,8 @@ public class JavaScriptTarget implements TeaVMTarget, TeaVMJavaScriptHost {
                 writer.getSectionSize(Renderer.SECTION_METADATA), totalSize));
         System.out.println("String pool size: " + getSizeWithPercentage(
                 writer.getSectionSize(Renderer.SECTION_STRING_POOL), totalSize));
+        System.out.println("Long pool size: " + getSizeWithPercentage(
+                writer.getSectionSize(Renderer.SECTION_LONG_POOL), totalSize));
 
         var packageSizeMap = new ObjectIntHashMap<String>();
         for (String className : writer.getClassesInStats()) {

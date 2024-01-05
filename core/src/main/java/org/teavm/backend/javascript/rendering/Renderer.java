@@ -74,6 +74,7 @@ import org.teavm.vm.TeaVMProgressFeedback;
 public class Renderer implements RenderingManager {
     public static final int SECTION_STRING_POOL = 0;
     public static final int SECTION_METADATA = 1;
+    public static final int SECTION_LONG_POOL = 2;
 
     private final SourceWriter writer;
     private final ListableClassReaderSource classSource;
@@ -206,6 +207,22 @@ public class Renderer implements RenderingManager {
             writer.append(";").softNewLine();
             writer.markSectionEnd();
         }
+    }
+
+    public void renderLongPool() throws RenderingException {
+        if (context.getLongPool().isEmpty()) {
+            return;
+        }
+        writer.markSectionStart(SECTION_LONG_POOL);
+        writer.appendFunction("$rt_longPool").append("([");
+        for (int i = 0; i < context.getLongPool().size(); ++i) {
+            if (i > 0) {
+                writer.append(',').ws();
+            }
+            RenderingUtil.writeLong(writer, context.getLongPool().get(i));
+        }
+        writer.append("]);").newLine();
+        writer.markSectionEnd();
     }
 
     public void renderCompatibilityStubs() throws RenderingException {

@@ -140,6 +140,14 @@ public final class RenderingUtil {
         return sb.toString();
     }
 
+    public static void writeLong(SourceWriter writer, Long l) {
+        writer.append("[")
+                .append(Long.toString(l & 0xFFFFFFFFL))
+                .append(",")
+                .append(Long.toString(l >>> 32))
+                .append("]");
+    }
+
     public static String indexToId(int index, String startChars) {
         if (index >= startChars.length()) {
             index -= startChars.length() - VARIABLE_PART_CHARS.length();
