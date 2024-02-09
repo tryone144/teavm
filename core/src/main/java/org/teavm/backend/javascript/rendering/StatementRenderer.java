@@ -656,7 +656,12 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     visitBinaryFunction(expr, "Long_and");
                     break;
                 case BITWISE_XOR:
-                    visitBinaryFunction(expr, "Long_xor");
+                    UnaryExpr not = extractBitwiseNot(expr);
+                    if (not != null) {
+                        visit(not);
+                    } else {
+                        visitBinaryFunction(expr, "Long_xor");
+                    }
                     break;
                 case LEFT_SHIFT:
                     visitBinaryFunction(expr, "Long_shl");
@@ -755,7 +760,12 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     visitBinary(expr, "&", false);
                     break;
                 case BITWISE_XOR:
-                    visitBinary(expr, "^", false);
+                    UnaryExpr not = extractBitwiseNot(expr);
+                    if (not != null) {
+                        visit(not);
+                    } else {
+                        visitBinary(expr, "^", false);
+                    }
                     break;
                 case LEFT_SHIFT:
                     visitBinary(expr, "<<", false);
@@ -769,6 +779,27 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     break;
             }
         }
+    }
+
+    private UnaryExpr extractBitwiseNot(BinaryExpr expr) {
+        if (expr.getOperation() != BinaryOperation.BITWISE_XOR) {
+            return null;
+        }
+        if (expr.getType() != OperationType.INT && expr.getType() != OperationType.LONG) {
+            return null;
+        }
+        if (!(expr.getSecondOperand() instanceof ConstantExpr)) {
+            return null;
+        }
+
+        Object rightConstant = ((ConstantExpr) expr.getSecondOperand()).getValue();
+        if (!rightConstant.equals(-1) && !rightConstant.equals(-1L)) {
+            return null;
+        }
+
+        Expr not = Expr.invert(expr.getFirstOperand());
+        ((UnaryExpr) not).setType(expr.getType());
+        return (UnaryExpr) not;
     }
 
     @Override
