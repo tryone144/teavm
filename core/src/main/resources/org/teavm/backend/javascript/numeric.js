@@ -23,17 +23,7 @@ let $rt_numberConversionIntArray = new teavm_globals.Int32Array($rt_numberConver
 
 let $rt_doubleToRawLongBits;
 let $rt_longBitsToDouble;
-if (typeof teavm_globals.BigInt !== 'function') {
-    $rt_doubleToRawLongBits = n => {
-        $rt_numberConversionView.setFloat64(0, n, true);
-        return new Long($rt_numberConversionView.getInt32(0, true), $rt_numberConversionView.getInt32(4, true));
-    }
-    $rt_longBitsToDouble = n => {
-        $rt_numberConversionView.setInt32(0, n.lo, true);
-        $rt_numberConversionView.setInt32(4, n.hi, true);
-        return $rt_numberConversionView.getFloat64(0, true);
-    }
-} else if (typeof teavm_globals.BigInt64Array !== 'function') {
+if (typeof teavm_globals.BigInt64Array !== 'function') {
     $rt_doubleToRawLongBits = n => {
         $rt_numberConversionView.setFloat64(0, n, true);
         let lo = $rt_numberConversionView.getInt32(0, true);
