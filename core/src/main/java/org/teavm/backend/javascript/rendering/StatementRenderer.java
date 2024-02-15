@@ -630,6 +630,19 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
         }
     }
 
+    private void visitCastUnsignedIntToLong(BinaryExpr orig, PrimitiveCastExpr cast) {
+        if (orig.getLocation() != null) {
+            pushLocation(orig.getLocation());
+        }
+        writer.appendFunction("Long_fromUInt").append('(');
+        precedence = Precedence.min();
+        cast.getValue().acceptVisitor(this);
+        writer.append(')');
+        if (orig.getLocation() != null) {
+            popLocation();
+        }
+    }
+
     @Override
     public void visit(BinaryExpr expr) {
         if (expr.getType() == OperationType.LONG) {
@@ -653,7 +666,12 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     visitBinaryFunction(expr, "Long_or");
                     break;
                 case BITWISE_AND:
-                    visitBinaryFunction(expr, "Long_and");
+                    PrimitiveCastExpr unsignedIntCast = extractUnsignedIntToLongCast(expr);
+                    if (unsignedIntCast != null) {
+                        visitCastUnsignedIntToLong(expr, unsignedIntCast);
+                    } else {
+                        visitBinaryFunction(expr, "Long_and");
+                    }
                     break;
                 case BITWISE_XOR:
                     UnaryExpr not = extractBitwiseNot(expr);
@@ -779,6 +797,35 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     break;
             }
         }
+    }
+
+    private PrimitiveCastExpr castUnsignedIntToLong(PrimitiveCastExpr cast, ConstantExpr constant) {
+        if (!(constant.getValue() instanceof Long)) {
+            return null;
+        }
+
+        long val = (Long) constant.getValue();
+        if (val != 0xFFFFFFFFL) {
+            return null;
+        }
+        if (cast.getSource() != OperationType.INT && cast.getTarget() != OperationType.LONG) {
+            return null;
+        }
+
+        return cast;
+    }
+
+    private PrimitiveCastExpr extractUnsignedIntToLongCast(BinaryExpr expr) {
+        Expr left = expr.getFirstOperand();
+        Expr right = expr.getSecondOperand();
+
+        if (left instanceof PrimitiveCastExpr && right instanceof ConstantExpr) {
+            return castUnsignedIntToLong((PrimitiveCastExpr) left, (ConstantExpr) right);
+        } else if (left instanceof ConstantExpr && right instanceof PrimitiveCastExpr) {
+            return castUnsignedIntToLong((PrimitiveCastExpr) right, (ConstantExpr) left);
+        }
+
+        return null;
     }
 
     private UnaryExpr extractBitwiseNot(BinaryExpr expr) {
