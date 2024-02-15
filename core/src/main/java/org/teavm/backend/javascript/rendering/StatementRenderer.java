@@ -682,13 +682,16 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
                     }
                     break;
                 case LEFT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shl");
+                    BinaryExpr constLeftShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constLeftShift != null ? constLeftShift : expr, "Long_shl");
                     break;
                 case RIGHT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shr");
+                    BinaryExpr constRightShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constRightShift != null ? constRightShift : expr, "Long_shr");
                     break;
                 case UNSIGNED_RIGHT_SHIFT:
-                    visitBinaryFunction(expr, "Long_shru");
+                    BinaryExpr constUnsignedRightShift = extractLongConstantShiftAmount(expr);
+                    visitBinaryFunction(constUnsignedRightShift != null ? constUnsignedRightShift : expr, "Long_shru");
                     break;
                 case COMPARE:
                     visitBinaryFunction(expr, "Long_compare");
@@ -847,6 +850,24 @@ public class StatementRenderer implements ExprVisitor, StatementVisitor {
         Expr not = Expr.invert(expr.getFirstOperand());
         ((UnaryExpr) not).setType(expr.getType());
         return (UnaryExpr) not;
+    }
+
+    private BinaryExpr extractLongConstantShiftAmount(BinaryExpr binary) {
+        Expr expr = binary.getSecondOperand();
+        if (!(expr instanceof ConstantExpr)) {
+            return null;
+        }
+
+        ConstantExpr constant = (ConstantExpr) expr;
+        if (!(constant.getValue() instanceof Number)) {
+            return null;
+        }
+
+        long amount = ((Number) constant.getValue()).longValue();
+        Long longAmount = Long.valueOf(amount & 63);
+
+        constant.setValue(longAmount);
+        return binary;
     }
 
     @Override

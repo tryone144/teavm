@@ -63,7 +63,7 @@ let Long_urem = (a, b) => teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.a
 let Long_and = (a, b) => teavm_globals.BigInt.asIntN(64, a & b);
 let Long_or = (a, b) => teavm_globals.BigInt.asIntN(64, a | b);
 let Long_xor = (a, b) => teavm_globals.BigInt.asIntN(64, a ^ b);
-let Long_shl = (a, b) => teavm_globals.BigInt.asIntN(64, a << teavm_globals.BigInt(b & 63));
-let Long_shr = (a, b) => teavm_globals.BigInt.asIntN(64, a >> teavm_globals.BigInt(b & 63));
-let Long_shru = (a, b) => teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(64, a) >> teavm_globals.BigInt(b & 63));
+let Long_shl = (a, b) => teavm_globals.BigInt.asIntN(64, a << ((typeof b === "bigint") ? b : teavm_globals.BigInt(b & 63)));
+let Long_shr = (a, b) => teavm_globals.BigInt.asIntN(64, a >> ((typeof b === "bigint") ? b : teavm_globals.BigInt(b & 63)));
+let Long_shru = (a, b) => teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(64, a) >> ((typeof b === "bigint") ? b : teavm_globals.BigInt(b & 63)));
 let Long_not = a => teavm_globals.BigInt.asIntN(64, ~a);
