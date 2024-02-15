@@ -17,6 +17,7 @@
 
 let Long_MAX_NORMAL = 1 << 18;
 let Long_ZERO = teavm_globals.BigInt(0);
+let Long_ONE = teavm_globals.BigInt(1);
 let Long_CONST32 = teavm_globals.BigInt(32);
 let Long_create = (lo, hi) => teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(64, teavm_globals.BigInt(lo))
     | teavm_globals.BigInt.asUintN(64, (teavm_globals.BigInt(hi) << Long_CONST32)));
@@ -34,8 +35,8 @@ let Long_ge = (a, b) => a >= b
 let Long_lt = (a, b) => a < b
 let Long_le = (a, b) => a <= b
 let Long_add = (a, b) => teavm_globals.BigInt.asIntN(64, a + b);
-let Long_inc = a => teavm_globals.BigInt.asIntN(64, a + teavm_globals.BigInt(1));
-let Long_dec = a => teavm_globals.BigInt.asIntN(64, a - teavm_globals.BigInt(1));
+let Long_inc = a => teavm_globals.BigInt.asIntN(64, a + Long_ONE);
+let Long_dec = a => teavm_globals.BigInt.asIntN(64, a - Long_ONE);
 let Long_neg = a => teavm_globals.BigInt.asIntN(64, -a);
 let Long_sub = (a, b) => teavm_globals.BigInt.asIntN(64, a - b);
 let Long_compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;

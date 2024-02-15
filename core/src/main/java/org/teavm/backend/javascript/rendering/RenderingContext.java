@@ -162,6 +162,8 @@ public abstract class RenderingContext {
             long value = (Long) cst;
             if (value == 0) {
                 writer.appendFunction("Long_ZERO");
+            } else if (value == 1) {
+                writer.appendFunction("Long_ONE");
             } else if ((int) value == value) {
                 writer.appendFunction("Long_fromInt").append("(").append(String.valueOf(value)).append(")");
             } else {
