@@ -24,19 +24,20 @@ let $rt_numberConversionIntArray = new teavm_globals.Int32Array($rt_numberConver
 let $rt_doubleToRawLongBits;
 let $rt_longBitsToDouble;
 if (typeof teavm_globals.BigInt64Array !== 'function') {
+    let __CONST_32 = teavm_globals.BigInt(32);
     $rt_doubleToRawLongBits = n => {
         $rt_numberConversionView.setFloat64(0, n, true);
         let lo = $rt_numberConversionView.getInt32(0, true);
         let hi = $rt_numberConversionView.getInt32(4, true);
         return teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(32, teavm_globals.BigInt(lo))
-            | (teavm_globals.BigInt(hi) << teavm_globals.BigInt(32)));
+            | (teavm_globals.BigInt(hi) << __CONST_32));
     }
     $rt_longBitsToDouble = n => {
         $rt_numberConversionView.setFloat64(0, n, true);
         let lo = $rt_numberConversionView.getInt32(0, true);
         let hi = $rt_numberConversionView.getInt32(4, true);
         return teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(32, teavm_globals.BigInt(lo))
-            | (teavm_globals.BigInt(hi) << teavm_globals.BigInt(32)));
+            | (teavm_globals.BigInt(hi) << __CONST_32));
     }
 } else {
     let $rt_numberConversionLongArray = new teavm_globals.BigInt64Array($rt_numberConversionBuffer);
