@@ -17,7 +17,11 @@
 
 let $rt_longPool_instance;
 let $rt_longPool = longs => {
-    $rt_longPool_instance = new teavm_globals.Array(longs.length);
+    if (typeof teavm_globals.BigInt64Array !== 'function') {
+        $rt_longPool_instance = new teavm_globals.Array(longs.length);
+    } else {
+        $rt_longPool_instance = new teavm_globals.BigInt64Array(longs.length);
+    }
     for (let i = 0; i < longs.length; ++i) {
         $rt_longPool_instance[i] = Long_create(longs[i][0], longs[i][1]);
     }
