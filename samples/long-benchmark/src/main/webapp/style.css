@@ -1,0 +1,17 @@
+.block {
+  border: solid 2px gray;
+  padding: 1rem;
+}
+.block-title {
+  font-weight: bold;
+}
+
+#impl-info {
+  font-style: italic;
+}
+
+#stdout {
+  height: 60vh;
+  overflow-y: scroll;
+  overflow-x: auto;
+}
