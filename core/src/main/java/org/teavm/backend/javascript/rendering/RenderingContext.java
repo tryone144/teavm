@@ -174,12 +174,22 @@ public abstract class RenderingContext {
             writer.appendFunction("$rt_s").append("(" + index + ")");
         } else if (cst instanceof Long) {
             long value = (Long) cst;
+            //if (value < 0) {
+            //    writer.append("(");
+            //    writer.append(Long.toString(value));
+            //    writer.append("n)");
+            //} else {
+            //    writer.append(Long.toString(value));
+            //    writer.append("n");
+            //}
             if (value == 0) {
                 writer.appendFunction("Long_ZERO");
+                //writer.append("0n");
             } else if (value == 1) {
                 writer.appendFunction("Long_ONE");
-            //} else if ((int) value == value) {
-            //    writer.appendFunction("Long_fromInt").append("(").append(String.valueOf(value)).append(")");
+                //writer.append("1n");
+            ////} else if ((int) value == value) {
+            ////    writer.appendFunction("Long_fromInt").append("(").append(String.valueOf(value)).append(")");
             } else {
                 int index = lookupLong(value);
                 writer.appendFunction("$rt_l").append("(" + index + ")");

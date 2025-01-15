@@ -141,11 +141,12 @@ public final class RenderingUtil {
     }
 
     public static void writeLong(SourceWriter writer, Long l) {
-        writer.append("[")
-                .append(Long.toString(l & 0xFFFFFFFFL))
-                .append(",")
-                .append(Long.toString(l >>> 32))
-                .append("]");
+        writer.append(Long.toString(l)).append("n");
+        //writer.append("[")
+        //        .append(Long.toString(l & 0xFFFFFFFFL))
+        //        .append(",")
+        //        .append(Long.toString(l >>> 32))
+        //        .append("]");
     }
 
     public static String indexToId(int index, String startChars) {

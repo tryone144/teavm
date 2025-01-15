@@ -19,11 +19,14 @@ let $rt_longPool_instance;
 let $rt_longPool = longs => {
     if (typeof teavm_globals.BigInt64Array !== 'function') {
         $rt_longPool_instance = new teavm_globals.Array(longs.length);
+        for (let i = 0; i < longs.length; ++i) {
+            $rt_longPool_instance[i] = teavm_globals.BigInt.asIntN(64, longs[i]);
+        }
     } else {
         $rt_longPool_instance = new teavm_globals.BigInt64Array(longs.length);
-    }
-    for (let i = 0; i < longs.length; ++i) {
-        $rt_longPool_instance[i] = Long_create(longs[i][0], longs[i][1]);
+        for (let i = 0; i < longs.length; ++i) {
+            $rt_longPool_instance[i] = longs[i];
+        }
     }
 }
 let $rt_l = index => $rt_longPool_instance[index];
