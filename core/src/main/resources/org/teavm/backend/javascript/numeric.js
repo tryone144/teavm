@@ -20,37 +20,16 @@ let $rt_numberConversionView = new teavm_globals.DataView($rt_numberConversionBu
 let $rt_numberConversionFloatArray = new teavm_globals.Float32Array($rt_numberConversionBuffer);
 let $rt_numberConversionDoubleArray = new teavm_globals.Float64Array($rt_numberConversionBuffer);
 let $rt_numberConversionIntArray = new teavm_globals.Int32Array($rt_numberConversionBuffer);
+let $rt_numberConversionLongArray = new teavm_globals.BigInt64Array($rt_numberConversionBuffer);
 
-let $rt_doubleToRawLongBits;
-let $rt_longBitsToDouble;
-if (typeof teavm_globals.BigInt64Array !== 'function') {
-    let __CONST_32 = teavm_globals.BigInt(32);
-    $rt_doubleToRawLongBits = n => {
-        $rt_numberConversionView.setFloat64(0, n, true);
-        let lo = $rt_numberConversionView.getInt32(0, true);
-        let hi = $rt_numberConversionView.getInt32(4, true);
-        return teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(32, teavm_globals.BigInt(lo))
-            | (teavm_globals.BigInt(hi) << __CONST_32));
-    }
-    $rt_longBitsToDouble = n => {
-        $rt_numberConversionView.setFloat64(0, n, true);
-        let lo = $rt_numberConversionView.getInt32(0, true);
-        let hi = $rt_numberConversionView.getInt32(4, true);
-        return teavm_globals.BigInt.asIntN(64, teavm_globals.BigInt.asUintN(32, teavm_globals.BigInt(lo))
-            | (teavm_globals.BigInt(hi) << __CONST_32));
-    }
-} else {
-    let $rt_numberConversionLongArray = new teavm_globals.BigInt64Array($rt_numberConversionBuffer);
-    $rt_doubleToRawLongBits = n => {
-        $rt_numberConversionDoubleArray[0] = n;
-        return $rt_numberConversionLongArray[0];
-    }
-    $rt_longBitsToDouble = n => {
-        $rt_numberConversionLongArray[0] = n;
-        return $rt_numberConversionDoubleArray[0];
-    }
+let $rt_doubleToRawLongBits = n => {
+    $rt_numberConversionDoubleArray[0] = n;
+    return $rt_numberConversionLongArray[0];
 }
-
+let $rt_longBitsToDouble = n => {
+    $rt_numberConversionLongArray[0] = n;
+    return $rt_numberConversionDoubleArray[0];
+}
 let $rt_floatToRawIntBits = n => {
     $rt_numberConversionFloatArray[0] = n;
     return $rt_numberConversionIntArray[0];
