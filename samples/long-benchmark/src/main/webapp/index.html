@@ -1,0 +1,49 @@
+<!--
+    Copyright 2023 Alexey Andreev.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JavaScript Long-Emulation Benchmark</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <script type="text/javascript" charset="utf-8" src="teavm/stdout.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript">
+        function runBench() {
+            const benchWorker = new Worker("worker.js");
+            benchWorker.onmessage = (msg) => {
+                if (msg.data?.type == "stdout") {
+                    $rt_putStdoutCustom(msg.data.data);
+                } else if (msg.data?.type == "done") {
+                    console.log("Benchmark done");
+                }
+            }
+            setTimeout(() => benchWorker.postMessage("start"), 1000);
+        }
+    </script>
+  </head>
+  <body onload="runBench()">
+    <h1>JavaScript Long-Emulation Benchmark</h1>
+    <p>This application tests the speed of the internal <code>long</code>-emulation using native <code>BigInt</code>s.</p>
+
+    <div id="blocks">
+      <div class="block" id="stdout-wrapper">
+        <div class="block-title">stdout</div>
+        <div class="block-content" id="stdout"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
